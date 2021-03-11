@@ -1,6 +1,7 @@
 import numpy as np
 import h5py
 import matplotlib.pyplot as plt
+import tifffile
 illinois_bounds = (37.53114756912893,42.47492527271053,-91.8149898022461,-87.39462351501466)
 oklahoma_bounds = (34.24527460247113,36.970101718281434,-102.9851672619629,-94.56955408752442)
 def get_indices(lat_data,long_data,lat_min,lat_max,long_min,long_max):
@@ -70,17 +71,28 @@ def get_soil_moisture_pm(file_name, bounds):
 
     return soil_moisture_data[min_lat:max_lat, min_long:max_long]
 
-soil_moisture_am = get_soil_moisture_am("smap.h5",illinois_bounds)
-soil_moisture_pm = get_soil_moisture_pm("smap.h5",illinois_bounds)
+def get_soil_moisture(smap_file, date, folder):
+    soil_moisture_am_illinois = get_soil_moisture_am(smap_file,illinois_bounds)
+    soil_moisture_pm_illinois = get_soil_moisture_pm(smap_file,illinois_bounds)
+    soil_moisture_am_oklahoma = get_soil_moisture_am(smap_file,oklahoma_bounds)
+    soil_moisture_pm_oklahoma = get_soil_moisture_pm(smap_file,oklahoma_bounds)
 
-soil_moisture_am[soil_moisture_am == -9999] = 0
-soil_moisture_pm[soil_moisture_pm == -9999] = 0
+    tifffile.imsave(folder + "/soil_moisture_am_illinois_" + str(date) + ".tif",soil_moisture_am_illinois)
+    tifffile.imsave(folder + "/soil_moisture_pm_illinois_" + str(date) + ".tif",soil_moisture_pm_illinois)
+    tifffile.imsave(folder + "/soil_moisture_am_oklahoma_" + str(date) + ".tif",soil_moisture_am_oklahoma)
+    tifffile.imsave(folder + "/soil_moisture_pm_oklahoma_" + str(date) + ".tif",soil_moisture_pm_oklahoma)
+if __name__ == '__main__':
+    soil_moisture_am = get_soil_moisture_am("SMAP_L3_SM_P_E_20200303_R17000_001.h5",illinois_bounds)
+    soil_moisture_pm = get_soil_moisture_pm("SMAP_L3_SM_P_E_20200303_R17000_001.h5",illinois_bounds)
 
-plt.figure()
-_, arr = plt.subplots(3,1)
-print(soil_moisture_am.shape)
-arr[0].imshow(soil_moisture_am)
-arr[1].imshow(soil_moisture_pm)
-arr[2].imshow(soil_moisture_am - soil_moisture_pm)
+    soil_moisture_am[soil_moisture_am == -9999] = 0
+    soil_moisture_pm[soil_moisture_pm == -9999] = 0
 
-print("sup")
+    plt.figure()
+    _, arr = plt.subplots(3,1)
+    print(soil_moisture_am.shape)
+    arr[0].imshow(soil_moisture_am)
+    arr[1].imshow(soil_moisture_pm)
+    arr[2].imshow(soil_moisture_am - soil_moisture_pm)
+
+    print("sup")
