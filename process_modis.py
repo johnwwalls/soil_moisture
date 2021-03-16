@@ -18,28 +18,8 @@ def merge(inps,outp):
         command = command + inp + " "
     os.system(command)
 def cut_to_box(inp,outp,bounds):
-    dataset = gdal.Open(inp)
-
-    geotransform = dataset.GetGeoTransform()
-
-    source = osr.SpatialReference()
-    source.ImportFromEPSG(4326) 
-
-    target = osr.SpatialReference()
-    target.ImportFromWkt(dataset.GetProjection())
-    transform = osr.CoordinateTransformation(source, target)
-
-    mx, my, z = transform.TransformPoint(bounds[2], bounds[1])
-    inv_geotransform = gdal.InvGeoTransform(geotransform)  
-
-    px1, py1 = (math.floor(f) for f in gdal.ApplyGeoTransform(inv_geotransform, mx, my))
-
-    mx, my, z = transform.TransformPoint(bounds[3], bounds[0])
-
-    px2, py2 = (math.floor(f) for f in gdal.ApplyGeoTransform(inv_geotransform, mx, my))
-
-    tiff = tifffile.imread(inp)
-    tifffile.imsave(outp,tiff[py1:py2,px1:px2])
+    command = "gdalwarp -te_srs EPSG:4326 -te " + str(bounds[2]) + " " + str(bounds[0]) + " " + str(bounds[3]) + " " + str(bounds[1]) + " " + inp + " " + outp
+    os.system(command)
 def prepare_files(inps,outp,bounds,subset):
     for inp in inps:
         read_to_tif('HDF4_EOS:EOS_GRID:"' + inp + '":MODIS_Grid_Daily_1km_LST:' + subset,inp.replace("hdf","tif"))
@@ -47,12 +27,18 @@ def prepare_files(inps,outp,bounds,subset):
     convert_to_gps(outp,outp.replace(".tif","_cut.tif"))
     for inp in inps:
         os.remove(inp.replace("hdf","tif"))
+    os.remove(outp)
     cut_to_box(outp.replace(".tif","_cut.tif"),outp,bounds)
     os.remove(outp.replace(".tif","_cut.tif"))
 def get_soil_temperature(date, modis_tiles, folder ):
     prepare_files(modis_tiles,folder + "/illinois_lst_night_" + str(date) + ".tif", illinois_bounds, "LST_Night_1km")
     prepare_files(modis_tiles,folder + "/illinois_lst_day_" + str(date) + ".tif", illinois_bounds, "LST_Day_1km")
+    prepare_files(modis_tiles,folder + "/illinois_qc_night_" + str(date) + ".tif", illinois_bounds, "QC_Night")
+    prepare_files(modis_tiles,folder + "/illinois_qc_day_" + str(date) + ".tif", illinois_bounds, "QC_Day")
+
     prepare_files(modis_tiles,folder + "/oklahoma_lst_night_" + str(date) + ".tif", oklahoma_bounds, "LST_Night_1km")
-    prepare_files(modis_tiles,folder + "/oklahoma_lst_dat_" + str(date) + ".tif", oklahoma_bounds, "LST_Day_1km")
-#if __name__ == '__main__':
-#prepare_files(["mod1.hdf","mod2.hdf"],"illinois.tif",illinois_bounds)
+    prepare_files(modis_tiles,folder + "/oklahoma_lst_day_" + str(date) + ".tif", oklahoma_bounds, "LST_Day_1km")
+    prepare_files(modis_tiles,folder + "/oklahoma_qc_night_" + str(date) + ".tif", oklahoma_bounds, "QC_Night")
+    prepare_files(modis_tiles,folder + "/oklahoma_qc_day_" + str(date) + ".tif", oklahoma_bounds, "QC_Day")
+if __name__ == '__main__':
+    prepare_files(["mod1.hdf","mod2.hdf"],"illinois.tif",illinois_bounds,"LST_Night_1km")

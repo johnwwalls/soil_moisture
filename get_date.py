@@ -4,6 +4,7 @@ import download_smap
 import download_modis
 import os
 import netrc
+
 def get_date_smap(date, folder):
     if not os.path.exists(folder):
         os.mkdir(folder)
@@ -31,8 +32,18 @@ def get_date_modis(date, folder):
     process_modis.get_soil_temperature(date, modis_tiles, folder)
     command = "rm -rf modistemp"
     os.system(command)
-def get_date(date, modis_dir, smap_dir):
+def merge(inps,outp):
+    command = "gdal_merge.py -o " + outp + " -separate "
+    for inp in inps:
+        command = command + inp + " "
+    os.system(command)
+def get_date(date, modis_dir, smap_dir,out_dir):
     get_date_modis(date,modis_dir)
     get_date_smap(date,smap_dir)
-get_date("2020-03-03","modis_data","smap_data")
+    if not os.path.exists(out_dir):
+        os.mkdir(out_dir)
+    merge([smap_dir + "/soil_moisture_am_illinois_" + str(date) + ".tif",smap_dir + "/soil_moisture_pm_illinois_" + str(date) + ".tif",modis_dir + "/illinois_lst_day_" + str(date) + ".tif",modis_dir + "/illinois_lst_night_" + str(date) + ".tif",modis_dir + "/illinois_qc_night_" + str(date) + ".tif",modis_dir + "/illinois_qc_day_" + str(date) + ".tif"],out_dir + "/illinois_" + str(date) + ".tif")
+    merge([smap_dir + "/soil_moisture_am_oklahoma_" + str(date) + ".tif",smap_dir + "/soil_moisture_pm_oklahoma_" + str(date) + ".tif",modis_dir + "/oklahoma_lst_day_" + str(date) + ".tif",modis_dir + "/oklahoma_lst_night_" + str(date) + ".tif",modis_dir + "/oklahoma_qc_night_" + str(date) + ".tif",modis_dir + "/oklahoma_qc_day_" + str(date) + ".tif"],out_dir + "/oklahoma_" + str(date) + ".tif")
+
+get_date("2020-03-03","modis_data","smap_data","data")
 
