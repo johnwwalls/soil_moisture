@@ -10,7 +10,7 @@ oklahoma_bounds = (34.24527460247113,36.970101718281434,-102.9851672619629,-94.5
 
 def add_geo_transform(inp,outp,lat_min,lat_max,long_min,long_max):
     np_data = tifffile.imread(inp)
-    np_data[np_data == -9999] = 0
+    np_data[np_data == -9999] = -9999
     num_cols = float(np_data.shape[1])
     num_rows = float(np_data.shape[0])
 
@@ -75,9 +75,11 @@ def get_soil_moisture_am(file_name, bounds):
 
     group_id=list(main_file.keys())[1];# < Lets focus on the AM overpass for this example
 
-    soil_moisture_id = list(main_file[group_id].keys())[24]
+    soil_moisture_id = list(main_file[group_id].keys())[24] #soil moisture
+    qc_id = list(main_file[group_id].keys())[16] #qc
 
     soil_moisture_data = main_file[group_id][soil_moisture_id][:,:]
+    qc_data = main_file[group_id][qc_id][:,:]
 
     lat_id = list(main_file[group_id].keys())[11]
     long_id = list(main_file[group_id].keys())[13]
@@ -87,7 +89,7 @@ def get_soil_moisture_am(file_name, bounds):
 
     min_lat_ind, max_lat_ind, min_long_ind, max_long_ind, min_lat, max_lat, min_long, max_long = get_indices(lat_data,long_data,lat_min,lat_max,long_min,long_max)
 
-    return soil_moisture_data[min_lat_ind:max_lat_ind, min_long_ind:max_long_ind], min_lat, max_lat, min_long, max_long
+    return soil_moisture_data[min_lat_ind:max_lat_ind, min_long_ind:max_long_ind], qc_data[min_lat_ind:max_lat_ind, min_long_ind:max_long_ind], min_lat, max_lat, min_long, max_long
 
 
 def get_soil_moisture_pm(file_name, bounds):
@@ -96,10 +98,12 @@ def get_soil_moisture_pm(file_name, bounds):
     main_file = h5py.File(file_name, 'r')
 
     group_id = list(main_file.keys())[2];  # < Lets focus on the AM overpass for this example
-
-    soil_moisture_id = list(main_file[group_id].keys())[26]
+    
+    soil_moisture_id = list(main_file[group_id].keys())[26] #soil moisture pm
+    qc_id = list(main_file[group_id].keys())[17] #qc pm
 
     soil_moisture_data = main_file[group_id][soil_moisture_id][:, :]
+    qc_data = main_file[group_id][qc_id][:, :]
 
     lat_id = list(main_file[group_id].keys())[12]
     long_id = list(main_file[group_id].keys())[14]
@@ -109,27 +113,39 @@ def get_soil_moisture_pm(file_name, bounds):
 
     min_lat_ind, max_lat_ind, min_long_ind, max_long_ind, min_lat, max_lat, min_long, max_long = get_indices(lat_data,long_data,lat_min,lat_max,long_min,long_max)
 
-    return soil_moisture_data[min_lat_ind:max_lat_ind, min_long_ind:max_long_ind], min_lat, max_lat, min_long, max_long
+    return soil_moisture_data[min_lat_ind:max_lat_ind, min_long_ind:max_long_ind],qc_data[min_lat_ind:max_lat_ind, min_long_ind:max_long_ind], min_lat, max_lat, min_long, max_long
 def get_soil_moisture(smap_file, date, folder):
-    soil_moisture_am_illinois,min_lat,max_lat,min_long,max_long = get_soil_moisture_am(smap_file,illinois_bounds)
+    soil_moisture_am_illinois,qc_am_illinois,min_lat,max_lat,min_long,max_long = get_soil_moisture_am(smap_file,illinois_bounds)
     tifffile.imsave(folder + "/soil_moisture_am_illinois_" + str(date) + "temp.tif",soil_moisture_am_illinois)
     add_geo_transform(folder + "/soil_moisture_am_illinois_" + str(date) + "temp.tif",folder + "/soil_moisture_am_illinois_" + str(date) + ".tif",min_lat,max_lat,min_long,max_long)
     os.remove(folder + "/soil_moisture_am_illinois_" + str(date) + "temp.tif")
+    tifffile.imsave(folder + "/qc_am_illinois_" + str(date) + "temp.tif",qc_am_illinois)
+    add_geo_transform(folder + "/qc_am_illinois_" + str(date) + "temp.tif",folder + "/qc_am_illinois_" + str(date) + ".tif",min_lat,max_lat,min_long,max_long)
+    os.remove(folder + "/qc_am_illinois_" + str(date) + "temp.tif")
 
-    soil_moisture_pm_illinois,min_lat,max_lat,min_long,max_long = get_soil_moisture_pm(smap_file,illinois_bounds)
+    soil_moisture_pm_illinois,qc_pm_illinois,min_lat,max_lat,min_long,max_long = get_soil_moisture_pm(smap_file,illinois_bounds)
     tifffile.imsave(folder + "/soil_moisture_pm_illinois_" + str(date) + "temp.tif",soil_moisture_pm_illinois)
     add_geo_transform(folder + "/soil_moisture_pm_illinois_" + str(date) + "temp.tif",folder + "/soil_moisture_pm_illinois_" + str(date) + ".tif",min_lat,max_lat,min_long,max_long)
     os.remove(folder + "/soil_moisture_pm_illinois_" + str(date) + "temp.tif")
+    tifffile.imsave(folder + "/qc_pm_illinois_" + str(date) + "temp.tif",qc_pm_illinois)
+    add_geo_transform(folder + "/qc_pm_illinois_" + str(date) + "temp.tif",folder + "/qc_pm_illinois_" + str(date) + ".tif",min_lat,max_lat,min_long,max_long)
+    os.remove(folder + "/qc_pm_illinois_" + str(date) + "temp.tif")
 
-    soil_moisture_am_oklahoma,min_lat,max_lat,min_long,max_long = get_soil_moisture_am(smap_file,oklahoma_bounds)
+    soil_moisture_am_oklahoma,qc_am_oklahoma,min_lat,max_lat,min_long,max_long = get_soil_moisture_am(smap_file,oklahoma_bounds)
     tifffile.imsave(folder + "/soil_moisture_am_oklahoma_" + str(date) + "temp.tif",soil_moisture_am_oklahoma)
     add_geo_transform(folder + "/soil_moisture_am_oklahoma_" + str(date) + "temp.tif",folder + "/soil_moisture_am_oklahoma_" + str(date) + ".tif",min_lat,max_lat,min_long,max_long)
     os.remove(folder + "/soil_moisture_am_oklahoma_" + str(date) + "temp.tif")
+    tifffile.imsave(folder + "/qc_am_oklahoma_" + str(date) + "temp.tif",qc_am_oklahoma)
+    add_geo_transform(folder + "/qc_am_oklahoma_" + str(date) + "temp.tif",folder + "/qc_am_oklahoma_" + str(date) + ".tif",min_lat,max_lat,min_long,max_long)
+    os.remove(folder + "/qc_am_oklahoma_" + str(date) + "temp.tif")
 
-    soil_moisture_pm_oklahoma,min_lat,max_lat,min_long,max_long = get_soil_moisture_pm(smap_file,oklahoma_bounds)
+    soil_moisture_pm_oklahoma, qc_pm_oklahoma,min_lat,max_lat,min_long,max_long = get_soil_moisture_pm(smap_file,oklahoma_bounds)
     tifffile.imsave(folder + "/soil_moisture_pm_oklahoma_" + str(date) + "temp.tif",soil_moisture_pm_oklahoma)
     add_geo_transform(folder + "/soil_moisture_pm_oklahoma_" + str(date) + "temp.tif",folder + "/soil_moisture_pm_oklahoma_" + str(date) + ".tif",min_lat,max_lat,min_long,max_long)
     os.remove(folder + "/soil_moisture_pm_oklahoma_" + str(date) + "temp.tif")
+    tifffile.imsave(folder + "/qc_pm_oklahoma_" + str(date) + "temp.tif",qc_pm_oklahoma)
+    add_geo_transform(folder + "/qc_pm_oklahoma_" + str(date) + "temp.tif",folder + "/qc_pm_oklahoma_" + str(date) + ".tif",min_lat,max_lat,min_long,max_long)
+    os.remove(folder + "/qc_pm_oklahoma_" + str(date) + "temp.tif")
 
 if __name__ == '__main__':
     soil_moisture_am = get_soil_moisture_am("SMAP_L3_SM_P_E_20200303_R17000_001.h5",illinois_bounds)
