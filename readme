@@ -1,0 +1,11 @@
+Files to get data:
+
+download_smap.py - downloads an h5 SMAP file for a given date covering the world. 
+download_modis.py - downloads 6 hdf MODIS files for a givne date which together cover Oklahoma and Illinois
+process_modis.py - merges the 6 MODIS files, warps them to the EPSG:4326 GPS coodinate system, cuts them to cover only
+    the given state, then resamples them to be ~9km resolution. Does this for night and day, LST and QC, Illinois and Oklahoma
+process_smap.py - the SMAP file is already in the correct coordinate system, but it's not set. So crop the SMAP data to cover the state 
+    and then add the geotransform to the file(doesn't change any of the data)
+get_date.py - calls the above functions, then merges all 8 generated files for each date and state into one 8 layer tif. This lines up all the pixels and makes
+    future pixel-by-pixel analysis easier
+merge_land_cover.py - merges the correct land cover tif file with the files generated in get_date.py
