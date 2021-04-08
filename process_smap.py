@@ -10,7 +10,6 @@ oklahoma_bounds = (34.24527460247113,36.970101718281434,-102.9851672619629,-94.5
 
 def add_geo_transform(inp,outp,lat_min,lat_max,long_min,long_max):
     np_data = tifffile.imread(inp)
-    np_data[np_data == -9999] = -9999
     num_cols = float(np_data.shape[1])
     num_rows = float(np_data.shape[0])
 

@@ -314,7 +314,7 @@ def cmr_search(short_name, version, time_start, time_end,
                                         polygon=polygon, filename_filter=filename_filter)
     if not quiet:
         print('Querying for data:\n\t{0}\n'.format(cmr_query_url))
-
+    print(cmr_query_url)
     cmr_scroll_id = None
     ctx = ssl.create_default_context()
     ctx.check_hostname = False
@@ -357,6 +357,7 @@ def main(date, argv=None):
         polygon, filename_filter, url_list
     time_start = str(date) + 'T00:00:00Z'
     time_end = str(date) + 'T23:59:59Z'
+    print(date)
     if argv is None:
         argv = sys.argv[1:]
 
@@ -384,19 +385,21 @@ def main(date, argv=None):
     if 'short_name' in short_name:
         short_name = 'ATL06'
         version = '003'
-        time_start = '2018-10-14T00:00:00Z'
-        time_end = '2021-01-08T21:48:13Z'
+        time_start = str(date) + 'T00:00:00Z'
+        time_end = str(date) + 'T21:48:13Z'
         bounding_box = ''
         polygon = ''
         filename_filter = '*ATL06_2020111121*'
         url_list = []
-
+    print(time_start)
+    print(time_end)
     try:
-        if not url_list:
+        #not url_list:
+        if True:
             url_list = cmr_search(short_name, version, time_start, time_end,
                                   bounding_box=bounding_box, polygon=polygon,
                                   filename_filter=filename_filter, quiet=quiet)
-
+            print(url_list)
         return cmr_download(url_list, force=force, quiet=quiet)
     except KeyboardInterrupt:
         quit()

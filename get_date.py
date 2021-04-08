@@ -49,7 +49,7 @@ from datetime import date, timedelta
 
 
 def get_all():
-    sdate = date(2020, 8, 11)   # start date
+    sdate = date(2019, 8, 1)   # start date
     edate = date(2021, 3, 3)   # end date
 
     delta = edate - sdate       # as timedelta
@@ -59,4 +59,6 @@ def get_all():
         print(day)
         get_date(day,"modis_data/" + str(day),"smap_data/" + str(day),"data/" + str(day))
 
-get_date("2020-03-03","modis_data_temp","smap_data_temp","data_temp")
+get_all()
+#day = "2020-08-13"
+#get_date(day,"modis_data/" + str(day),"smap_data/" + str(day),"data/" + str(day))

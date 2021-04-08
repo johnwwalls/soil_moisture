@@ -3,42 +3,67 @@ import os
 from scipy import stats, optimize, interpolate
 import matplotlib.pyplot as plt 
 import numpy as np 
-data_x = []
-data_y = []
-data_q = []
-c = 0
-for date in os.listdir("data"):
-    try:
-        img = tifffile.imread("data/" + date + "/illinois_" + date + ".tif")
-        #for i in range(len(img)):
-        #    for j in range(len(img[i])):
-                #data_q.append(img[i][j][4])
-                #data_q.append(img[i][j][5])
-        #        if img[i][j][0] != 0 and .02*(img[i][j][2] - img[i][j][3]) < 10 and .02*(img[i][j][2] - img[i][j][3]) > -10 and img[i][j][4] > 15 and img[i][j][5] > 15:
-        if c == 0:
-            data_x = .02*(img[:,:,2] - img[:,:,3])
-            print(np.average(data_x))
-            data_y = img[:,:,0]
+import matplotlib.dates as mdates
+import datetime as dt
+
+def compare_sm_am(value):
+    return value[0] > 0 and (value[2] == 0 or value[2] == 8)
+def compare_sm_pm(value):
+    return value[1] > 0 and (value[3] == 0 or value[3] == 8)
+def compare_lst_day(value):
+    return value[5] != 0 and value[7] != 0
+def compare_lst_night(value):
+    return value[4] != 0 and value[6] != 0
+def compare(typ, val):
+    if typ == "soil_moisture_am":
+        return compare_sm_am(val)
+    if typ == "soil_moisture_pm":
+        return compare_sm_pm(val)
+    if typ == "lst_day":
+        return compare_lst_day(val)
+    if typ == "lst_night":
+        return compare_lst_night(val)
+    return false
+
+types = {
+    "soil_moisture_am":0,
+    "soil_moisture_pm":1,
+    "lst_day":5,
+    "lst_night":4,
+}
+def get_time_series(typ, state, i, j, scale):
+    layer = types[typ]
+    data_x = []
+    data_y = []
+    for date in sorted(os.listdir("data")):
+        if True:
+            img = tifffile.imread("data/" + date + "/" + state + "_" + date + ".tif")
+            if len(img[i][j]) == 8 and compare(typ, img[i][j]):
+                data_y.append(img[i][j][layer]*scale)
+            else:
+                data_y.append(np.nan)
+            data_x.append(dt.datetime.strptime(date,'%Y-%m-%d').date())
         else:
-            data_x = data_x + np.abs(.02*(img[:,:,2] - img[:,:,3]))
-            data_y = data_y + img[:,:,0]
-                    #data_x.append(.02*(img[i][j][2] - img[i][j][3]))
-                    #data_y.append(img[i][j][0])
-        c = c + 1
-    except:
-        print("error")
-print(data_x.shape)
-print(data_y.shape)
-print(np.average(data_x))
-print((data_x/c)[:50,:40])
-tifffile.imsave("x.tif",(data_x/c)[:50,:40] - 90)
-tifffile.imsave("y.tif",data_y/c)
-"""slope, intercept, r_value, p_value, std_err = stats.linregress(data_x, data_y)
-print(np.average(np.array(data_q)))
-print(slope)
-print(intercept)
-print(r_value**2)
-print(len(data_x))
-print(len(data_y))
-plt.scatter(data_x, data_y)
-plt.savefig('foo.png') """
+            print("error")
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%Y'))
+    plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=100))  
+    plt.scatter(data_x, data_y)
+    plt.title(typ + " " + state + " for i: " + str(i) + " and j: " + str(j))
+    plt.gcf().autofmt_xdate()
+    plt.savefig(typ + '_time_series/' + state + '_' + str(i) + '_' + str(j) + '.png') 
+    plt.clf()
+illinois_grids = [(10,20),(14,34),(19,32),(30,30),(31,41)]
+oklahoma_grids = [(10,20),(11,41),(19,24),(19,35),(26,38)]
+
+get_time_series('soil_moisture_am','illinois',27,40, .02)
+get_time_series('soil_moisture_pm','illinois',27,40, .02)
+for grid in illinois_grids:
+    """get_time_series('soil_moisture_am','illinois',grid[0],grid[1], 1)
+    get_time_series('soil_moisture_pm','illinois',grid[0],grid[1], 1)
+    get_time_series('lst_day','illinois',grid[0],grid[1], .02)"""
+    get_time_series('lst_night','illinois',grid[0],grid[1], .02)
+"""for grid in oklahoma_grids:
+    get_time_series('soil_moisture_am','oklahoma',grid[0],grid[1], 1)
+    get_time_series('soil_moisture_pm','oklahoma',grid[0],grid[1], 1)
+    get_time_series('lst_day','oklahoma',grid[0],grid[1], .02)
+    get_time_series('lst_night','oklahoma',grid[0],grid[1], .02)"""
