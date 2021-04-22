@@ -22,7 +22,7 @@ def make_smap(state,date,outdir,pm):
     img = imgog[:,:,0:1] #soil moisture am
     if pm:
         img = imgog[:,:,1:2] #soil moisture pm
-    
+    print(np.unique(imgog[:,:,2:3],return_counts=True))
     #img[img == -9999] = np.nan
     for i in range(len(imgog)):
         for j in range(len(imgog[i])):
@@ -49,9 +49,11 @@ def make_lst(state,date,outdir,night):
     
     for i in range(len(imgog)):
         for j in range(len(imgog[i])):
-            if not night and not (imgog[i][j][4] != 0 and imgog[i][j][6] > 0 and (imgog[i][j][8] in valid_land_cover_values)):
+            #if not night and not (imgog[i][j][4] != 0 and imgog[i][j][6] < 64 and (imgog[i][j][8] in valid_land_cover_values)):
+            if not night and not (imgog[i][j][4] != 0 and (imgog[i][j][8] in valid_land_cover_values)):
                 img[i,j] = np.nan
-            elif night and not (imgog[i][j][5] != 0 and imgog[i][j][7] > 0 and (imgog[i][j][8] in valid_land_cover_values)):
+            elif night and not (imgog[i][j][5] != 0 and (imgog[i][j][8] in valid_land_cover_values)):
+                #elif night and not (imgog[i][j][5] != 0 """and imgog[i][j][7] < 64""" and (imgog[i][j][8] in valid_land_cover_values)):
                 img[i,j] = np.nan
                 
     plt.title("LST " + day_str + " in " + state + " for " + date)
@@ -59,13 +61,15 @@ def make_lst(state,date,outdir,night):
     plt.colorbar(plot)
     plt.savefig(outdir + "/" + date + "/lst_" + day_str + "_" + state + "_" + date + ".png")
 def draw_date(date,outdir):
-    make_smap("illinois",date,outdir, True)
-    make_smap("illinois",date,outdir, False)
+    #make_smap("illinois",date,outdir, True)
+    #make_smap("illinois",date,outdir, False)
     make_lst("illinois",date,outdir, True)
     make_lst("illinois",date,outdir, False)
+    make_mydis("illinois",date,outdir, True)
+    make_mydis("illinois",date,outdir, False)
 
-    make_smap("oklahoma",date,outdir, True)
-    make_smap("oklahoma",date,outdir, False)
+    #make_smap("oklahoma",date,outdir, True)
+    #make_smap("oklahoma",date,outdir, False)
     make_lst("oklahoma",date,outdir, True)
     make_lst("oklahoma",date,outdir, False)
 
@@ -75,5 +79,5 @@ def get_all(outdir):
     for date in os.listdir("data"):
         print(date)
         draw_date(date,outdir)
-#get_all("images")
-draw_date("2019-08-24","images")
+get_all("images")
+#draw_date("2019-08-24","images")

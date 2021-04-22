@@ -7,6 +7,7 @@ import gdal
 import osr
 illinois_bounds = (37.53114756912893,42.47492527271053,-91.8149898022461,-87.39462351501466)
 oklahoma_bounds = (34.24527460247113,36.970101718281434,-102.9851672619629,-94.56955408752442)
+missouri_bounds = (37.061571,40.602820,-95.007699,-91.239652)
 
 def add_geo_transform(inp,outp,lat_min,lat_max,long_min,long_max):
     np_data = tifffile.imread(inp)
@@ -145,7 +146,23 @@ def get_soil_moisture(smap_file, date, folder):
     tifffile.imsave(folder + "/qc_pm_oklahoma_" + str(date) + "temp.tif",qc_pm_oklahoma)
     add_geo_transform(folder + "/qc_pm_oklahoma_" + str(date) + "temp.tif",folder + "/qc_pm_oklahoma_" + str(date) + ".tif",min_lat,max_lat,min_long,max_long)
     os.remove(folder + "/qc_pm_oklahoma_" + str(date) + "temp.tif")
+    """
+    soil_moisture_am_missouri,qc_am_missouri,min_lat,max_lat,min_long,max_long = get_soil_moisture_am(smap_file,missouri_bounds)
+    tifffile.imsave(folder + "/soil_moisture_am_missouri_" + str(date) + "temp.tif",soil_moisture_am_missouri)
+    add_geo_transform(folder + "/soil_moisture_am_missouri_" + str(date) + "temp.tif",folder + "/soil_moisture_am_missouri_" + str(date) + ".tif",min_lat,max_lat,min_long,max_long)
+    os.remove(folder + "/soil_moisture_am_missouri_" + str(date) + "temp.tif")
+    tifffile.imsave(folder + "/qc_am_missouri_" + str(date) + "temp.tif",qc_am_missouri)
+    add_geo_transform(folder + "/qc_am_missouri_" + str(date) + "temp.tif",folder + "/qc_am_missouri_" + str(date) + ".tif",min_lat,max_lat,min_long,max_long)
+    os.remove(folder + "/qc_am_missouri_" + str(date) + "temp.tif")
 
+    soil_moisture_pm_missouri, qc_pm_missouri,min_lat,max_lat,min_long,max_long = get_soil_moisture_pm(smap_file,missouri_bounds)
+    tifffile.imsave(folder + "/soil_moisture_pm_missouri_" + str(date) + "temp.tif",soil_moisture_pm_missouri)
+    add_geo_transform(folder + "/soil_moisture_pm_missouri_" + str(date) + "temp.tif",folder + "/soil_moisture_pm_missouri_" + str(date) + ".tif",min_lat,max_lat,min_long,max_long)
+    os.remove(folder + "/soil_moisture_pm_missouri_" + str(date) + "temp.tif")
+    tifffile.imsave(folder + "/qc_pm_missouri_" + str(date) + "temp.tif",qc_pm_missouri)
+    add_geo_transform(folder + "/qc_pm_missouri_" + str(date) + "temp.tif",folder + "/qc_pm_missouri_" + str(date) + ".tif",min_lat,max_lat,min_long,max_long)
+    os.remove(folder + "/qc_pm_missouri_" + str(date) + "temp.tif")
+    """
 if __name__ == '__main__':
     soil_moisture_am = get_soil_moisture_am("SMAP_L3_SM_P_E_20200303_R17000_001.h5",illinois_bounds)
     soil_moisture_pm = get_soil_moisture_pm("SMAP_L3_SM_P_E_20200303_R17000_001.h5",illinois_bounds)

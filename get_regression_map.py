@@ -17,7 +17,7 @@ def get_regression_map(state, typ):
         if month < 8 and month >= 0:
             continue
         if True:
-            img = tifffile.imread("data/" + date + "/" + state + "_land_cover_2_" + date + ".tif")
+            img = tifffile.imread("data/" + date + "/" + state + "_land_cover_" + date + ".tif")
             for i in range(0,len(img)):
                 if count == 0:
                     data_x1.append([])
@@ -33,13 +33,13 @@ def get_regression_map(state, typ):
                     if len(img[i][j]) < 9:
                         continue
                     if typ == "am":
-                        if img[i][j][4] != 0 and img[i][j][5] != 0 and img[i][j][6] != 0 and img[i][j][7] != 0 and img[i][j][0] > 0 and (img[i][j][2] == 0 or img[i][j][2] == 8) and (img[i][j][8] in valid_land_cover_values):
+                        if img[i][j][4] != 0 and img[i][j][5] != 0 and img[i][j][6] < 64 and img[i][j][7] < 64 and img[i][j][0] > 0 and (img[i][j][2] == 0 or img[i][j][2] == 8) and (img[i][j][8] in valid_land_cover_values):
                             data_x1[i][j].append(img[i][j][4]*.02)
                             data_x2[i][j].append(img[i][j][5]*.02)
                             data_xdiff[i][j].append(img[i][j][4]*.02 - img[i][j][5]*.02)
                             data_y[i][j].append(img[i][j][0])
                     if typ == "pm":
-                        if img[i][j][4] != 0 and img[i][j][5] != 0 and img[i][j][6] != 0 and img[i][j][7] != 0 and img[i][j][1] > 0 and (img[i][j][3] == 0 or img[i][j][3] == 8) and (img[i][j][8] in valid_land_cover_values):
+                        if img[i][j][4] != 0 and img[i][j][5] != 0 and img[i][j][6] < 64 and img[i][j][7] < 64 and img[i][j][1] > 0 and (img[i][j][3] == 0 or img[i][j][3] == 8) and (img[i][j][8] in valid_land_cover_values):
                             data_x1[i][j].append(img[i][j][4]*.02)
                             data_x2[i][j].append(img[i][j][5]*.02)
                             data_xdiff[i][j].append(img[i][j][4]*.02 - img[i][j][5]*.02)
@@ -81,3 +81,5 @@ get_regression_map("illinois","am")
 get_regression_map("illinois","pm")
 get_regression_map("oklahoma","am")
 get_regression_map("oklahoma","pm")
+#get_regression_map("missouri","am")
+#get_regression_map("missouri","pm")

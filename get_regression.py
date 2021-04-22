@@ -16,8 +16,8 @@ def get_regression_super(state, typ):
         month = int(date[5:7])
         if month < 8 and month >= 0:
             continue
-        if True:
-            img = tifffile.imread("data/" + date + "/" + state + "_land_cover_2_" + date + ".tif")
+        try:
+            img = tifffile.imread("data/" + date + "/" + state + "_land_cover_" + date + ".tif")
             x1 = 0
             x2 = 0
             y = 0
@@ -28,13 +28,13 @@ def get_regression_super(state, typ):
                     if len(img[i][j]) < 9:
                         continue
                     if typ == "am":
-                        if img[i][j][4] != 0 and img[i][j][5] != 0 and img[i][j][6] != 0 and img[i][j][7] != 0 and img[i][j][0] > 0 and (img[i][j][2] == 0 or img[i][j][2] == 8) and (img[i][j][8] in valid_land_cover_values):
+                        if img[i][j][4] != 0 and img[i][j][5] != 0 and img[i][j][6] < 64 and img[i][j][7] < 64 and img[i][j][0] > 0 and (img[i][j][2] == 0 or img[i][j][2] == 8) and (img[i][j][8] in valid_land_cover_values):
                             x1 = x1 + img[i][j][4]
                             x2 = x2 + img[i][j][5]
                             y = y + img[i][j][0]
                             c = c + 1
                     if typ == "pm":
-                        if img[i][j][4] != 0 and img[i][j][5] != 0 and img[i][j][6] != 0 and img[i][j][7] != 0 and img[i][j][1] > 0 and (img[i][j][3] == 0 or img[i][j][3] == 8) and (img[i][j][8] in valid_land_cover_values):
+                        if img[i][j][4] != 0 and img[i][j][5] != 0 and img[i][j][6] < 64 and img[i][j][7] < 64 and img[i][j][1] > 0 and (img[i][j][3] == 0 or img[i][j][3] == 8) and (img[i][j][8] in valid_land_cover_values):
                             x1 = x1 + img[i][j][4]
                             x2 = x2 + img[i][j][5]
                             y = y + img[i][j][1]
@@ -49,7 +49,7 @@ def get_regression_super(state, typ):
                 data_x2.append(x2)
                 data_y.append(y)
                 data_xdiff.append(x1 - x2)
-        else:
+        except:
             print("error")
     print(len(data_x1))
     print(len(data_x2))
@@ -80,25 +80,25 @@ def get_regression(state, typ):
         month = int(date[5:7])
         if month < 8 and month >= 0:
             continue
-        if True:
+        try:
             img = tifffile.imread("data/" + date + "/" + state + "_land_cover_" + date + ".tif")
             for i in range(0,len(img)):
                 for j in range(len(img[i])):
                     if len(img[i][j]) < 9:
                         continue
                     if typ == "am":
-                        if img[i][j][4] != 0 and img[i][j][5] != 0 and img[i][j][6] != 0 and img[i][j][7] != 0 and img[i][j][0] > 0 and (img[i][j][2] == 0 or img[i][j][2] == 8) and (img[i][j][8] in valid_land_cover_values):
+                        if img[i][j][4] != 0 and img[i][j][5] != 0 and img[i][j][6] < 64 and img[i][j][7] < 64 and img[i][j][0] > 0 and (img[i][j][2] == 0 or img[i][j][2] == 8) and (img[i][j][8] in valid_land_cover_values):
                             data_x1.append(img[i][j][4]*.02)
                             data_x2.append(img[i][j][5]*.02)
                             data_xdiff.append(img[i][j][4]*.02 - img[i][j][5]*.02)
                             data_y.append(img[i][j][0])
                     if typ == "pm":
-                        if img[i][j][4] != 0 and img[i][j][5] != 0 and img[i][j][6] != 0 and img[i][j][7] != 0 and img[i][j][1] > 0 and (img[i][j][3] == 0 or img[i][j][3] == 8) and (img[i][j][8] in valid_land_cover_values):
+                        if img[i][j][4] != 0 and img[i][j][5] != 0 and img[i][j][6] < 64 and img[i][j][7] < 64 and img[i][j][1] > 0 and (img[i][j][3] == 0 or img[i][j][3] == 8) and (img[i][j][8] in valid_land_cover_values):
                             data_x1.append(img[i][j][4]*.02)
                             data_x2.append(img[i][j][5]*.02)
                             data_xdiff.append(img[i][j][4]*.02 - img[i][j][5]*.02)
                             data_y.append(img[i][j][1])
-        else:
+        except:
             print("error")
     print(len(data_x1))
     print(len(data_x2))
@@ -129,3 +129,9 @@ get_regression_super("illinois","am")
 get_regression_super("illinois","pm")
 get_regression_super("oklahoma","am")
 get_regression_super("oklahoma","pm")
+
+"""
+get_regression("missouri","am")
+get_regression("missouri","pm")
+get_regression_super("missouri","am")
+get_regression_super("missouri","pm")"""
